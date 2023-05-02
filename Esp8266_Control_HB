@@ -1,0 +1,568 @@
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+#include <Servo.h> 
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
+//Ultrasonic
+#define SOUND_VELOCITY 0.034
+#define CM_TO_INCH 0.393701
+long duration;
+float distanceCm;
+float distanceInch;
+const int trigPin = D7;
+const int echoPin = D8;
+///////////////////////////////////////////////////
+//MAX30105
+/*
+#include <Wire.h>
+#include "MAX30105.h"
+#include "heartRate.h"
+MAX30105 particleSensor;
+const byte RATE_SIZE = 4;
+byte rates[RATE_SIZE];
+byte rateSpot = 0;
+long lastBeat = 0; 
+float beatsPerMinute;
+int beatAvg;
+unsigned long lastMeasurementTime = 0; //Time at which the last measurement occurred
+const unsigned long MEASUREMENT_INTERVAL = 5000; //Measurement interval in milliseconds (1 second)
+*/
+///////////////////////////////////////////////////
+//GY-906-BCC MLX90614
+#include <Adafruit_MLX90614.h>
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+//////////////////////////
+ESP8266WiFiMulti WiFiMulti;
+String payload;
+String payload2;
+String payload3;
+String payload4;
+String payload5;
+String payload6;
+String payload7;
+String payload8;
+Servo servo1;  
+Servo servo2;  
+Servo servo3;  
+Servo servo4;
+
+
+long microsecondsToCentimeters(long microseconds){
+  return microseconds / 29 / 2;
+}
+void setup() {
+
+  Serial.begin(115200);
+    for (uint8_t t = 4; t > 0; t--) {
+    Serial.printf("[SETUP] WAIT %d...\n", t);
+    Serial.flush();
+    delay(1000);
+  }
+
+  WiFi.mode(WIFI_STA);
+  WiFiMulti.addAP("LKH8920", "17Bi16@9");
+  // Serial.setDebugOutput(true);
+  servo1.attach(D6);
+  servo2.attach(D5);
+  servo3.attach(D4);
+  servo4.attach(D3);
+
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+//////////////////////////////////////////////////////////////////////////////////////////////////MAX30105
+/*if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed{
+    Serial.println("MAX30105 was not found. Please check wiring/power. ");
+    while (1);
+  }
+  Serial.println("Place your index finger on the sensor with steady pressure.");
+
+  particleSensor.setup(); //Configure sensor with default settings
+  particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
+  particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
+*/
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //gy906
+  mlx.begin();
+////////////////////////////////////////////////////////////  
+
+}
+
+void loop() {
+    servo1.write(0);
+    servo2.write(0);
+    servo3.write(0);
+    servo4.write(0);
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+    WiFiClient client;
+
+    HTTPClient http;
+
+    Serial.print("[HTTP] begin...\n");
+    if (http.begin(client, "http://10.232.153.49:8080/project/DB/get/test/GetData.php?ID=9")) {  // HTTP
+        Serial.print("[HTTP] GET...\n");
+        // start connection and send HTTP header
+        int httpCode = http.GET();
+        // httpCode will be negative on error
+        if (httpCode > 0) {
+          // HTTP header has been send and Server response header has been handled
+          Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+          // file found at server
+          if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+            payload = http.getString();
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        }
+
+        http.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, payload);
+
+
+    String stat1 = doc["Status_Onoff"];
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+      WiFiClient client2;
+
+      HTTPClient http2;
+
+      Serial.print("[HTTP] begin...\n");
+      if (http2.begin(client2, "http://10.232.153.49:8080/project/DB/get/test/GetData.php?ID=10")) {  // HTTP
+
+        // start connection and send HTTP header
+        int httpCode2 = http2.GET();
+        // httpCode will be negative on error
+        if (httpCode2 > 0) {
+          // HTTP header has been send and Server response header has been handled
+          // file found at server
+          if (httpCode2 == HTTP_CODE_OK || httpCode2 == HTTP_CODE_MOVED_PERMANENTLY) {
+            payload2 = http2.getString();
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http2.errorToString(httpCode2).c_str());
+        }
+
+        http2.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc2(1024);
+    deserializeJson(doc2, payload2);
+
+
+    String stat2 = doc2["Status_Onoff"];
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////2
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+      WiFiClient client3;
+
+      HTTPClient http3;
+
+      Serial.print("[HTTP] begin...\n");
+      if (http3.begin(client3, "http://10.232.153.49:8080/project/DB/get/test/GetData.php?ID=11")) {  // HTTP
+
+        // start connection and send HTTP header
+        int httpCode3 = http3.GET();
+        // httpCode will be negative on error
+        if (httpCode3 > 0) {
+          // HTTP header has been send and Server response header has been handled
+          // file found at server
+          if (httpCode3 == HTTP_CODE_OK || httpCode3 == HTTP_CODE_MOVED_PERMANENTLY) {
+            payload3 = http3.getString();
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http3.errorToString(httpCode3).c_str());
+        }
+
+        http3.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc3(1024);
+    deserializeJson(doc3, payload3);
+
+
+    String stat3 = doc3["Status_Onoff"];
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////3
+
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+      WiFiClient client4;
+
+      HTTPClient http4;
+
+      Serial.print("[HTTP] begin...\n");
+      if (http4.begin(client4, "http://10.232.153.49:8080/project/DB/get/test/GetData.php?ID=12")) {  // HTTP
+
+        // start connection and send HTTP header
+        int httpCode4 = http4.GET();
+        // httpCode will be negative on error
+        if (httpCode4 > 0) {
+          // HTTP header has been send and Server response header has been handled
+          // file found at server
+          if (httpCode4 == HTTP_CODE_OK || httpCode4 == HTTP_CODE_MOVED_PERMANENTLY) {
+            payload4 = http4.getString();
+
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http4.errorToString(httpCode4).c_str());
+        }
+
+        http4.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc4(1024);
+    deserializeJson(doc4, payload4);
+
+
+    String stat4 = doc4["Status_Onoff"];
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////4
+    if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+      WiFiClient client5;
+
+      HTTPClient http5;
+
+      Serial.print("[HTTP] begin...\n");
+      if (http5.begin(client5, "http://10.232.153.49:8080/project/DB/get/test/GetDatas.php?ID=1")) {  // HTTP
+        Serial.print("[HTTP] GET...\n");
+        // start connection and send HTTP header
+        int httpCode5 = http5.GET();
+        // httpCode will be negative on error
+        if (httpCode5 > 0) {
+          // HTTP header has been send and Server response header has been handled
+
+          // file found at server
+          if (httpCode5 == HTTP_CODE_OK || httpCode5 == HTTP_CODE_MOVED_PERMANENTLY) {
+            payload5 = http5.getString();
+
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http5.errorToString(httpCode5).c_str());
+        }
+
+        http5.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc5(1024);
+    deserializeJson(doc5, payload5);
+
+    String id1 = doc5["Status_success"];
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////1
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+      WiFiClient client6;
+
+      HTTPClient http6;
+
+      Serial.print("[HTTP] begin...\n");
+      if (http6.begin(client6, "http://10.232.153.49:8080/project/DB/get/test/GetDatas.php?ID=2")) {  // HTTP
+
+        // start connection and send HTTP header
+        int httpCode6 = http6.GET();
+        // httpCode will be negative on error
+        if (httpCode6 > 0) {
+          // HTTP header has been send and Server response header has been handled
+          // file found at server
+          if (httpCode6 == HTTP_CODE_OK || httpCode6 == HTTP_CODE_MOVED_PERMANENTLY) {
+            payload6 = http6.getString();
+
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http6.errorToString(httpCode6).c_str());
+        }
+
+        http6.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc6(1024);
+    deserializeJson(doc6, payload6);
+
+    String id2 = doc6["Status_success"];
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////6
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+      WiFiClient client7;
+
+      HTTPClient http7;
+
+      Serial.print("[HTTP] begin...\n");
+      if (http7.begin(client7, "http://10.232.153.49:8080/project/DB/get/test/GetDatas.php?ID=3")) {  // HTTP
+
+        // start connection and send HTTP header
+        int httpCode7 = http7.GET();
+        // httpCode will be negative on error
+        if (httpCode7 > 0) {
+          // HTTP header has been send and Server response header has been handled
+          // file found at server
+          if (httpCode7 == HTTP_CODE_OK || httpCode7 == HTTP_CODE_MOVED_PERMANENTLY) {
+            payload7 = http7.getString();
+
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http7.errorToString(httpCode7).c_str());
+        }
+
+        http7.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc7(1024);
+    deserializeJson(doc7, payload7);
+
+    String id3 = doc7["Status_success"];
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
+
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+      WiFiClient client8;
+
+      HTTPClient http8;
+
+      Serial.print("[HTTP] begin...\n");
+      if (http8.begin(client8, "http://10.232.153.49:8080/project/DB/get/test/GetDatas.php?ID=4")) {  // HTTP
+
+        // start connection and send HTTP header
+        int httpCode8 = http8.GET();
+        // httpCode will be negative on error
+        if (httpCode8 > 0) {
+          // HTTP header has been send and Server response header has been handled
+          // file found at server
+          if (httpCode8 == HTTP_CODE_OK || httpCode8== HTTP_CODE_MOVED_PERMANENTLY) {
+            payload8 = http8.getString();
+
+          }
+        } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http8.errorToString(httpCode8).c_str());
+        }
+
+        http8.end();
+      } else {
+        Serial.println("[HTTP] Unable to connect");
+      }
+    }
+    DynamicJsonDocument doc8(1024);
+    deserializeJson(doc8, payload8);
+
+    String id4 = doc8["Status_success"];
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8
+    Serial.print(id1);
+    Serial.println(": "+stat1);
+    Serial.print(id2);
+    Serial.println(": "+stat2);
+    Serial.print(id3);
+    Serial.println(": "+stat3);
+    Serial.print(id4);
+    Serial.println(": "+stat4);
+    if(id1 == "success"){
+      if(stat1 == "On"){
+        servo1.write(150);
+          delay(1500);
+        Serial.println("1:On");
+        servo1.write(0);
+      }else{
+        Serial.println("1:OFF");
+      }
+    }if(id2 == "success"){
+      if(stat2 == "On"){
+        servo2.write(150);
+          delay(1500);
+        Serial.println("2:On");
+        servo2.write(0);    
+      }else{
+        Serial.println("2:OFF");
+      }
+    }if(id3 == "success"){
+      if(stat3 == "On"){
+        servo3.write(150);
+          delay(1500);
+        Serial.println("3:On");
+        servo3.write(0);
+      }else{
+        Serial.println("3:OFF");
+      }
+    }if(id4 == "success"){
+      if(stat4 == "On"){
+        servo4.write(150);
+        delay(1500);
+        Serial.println("4:On");
+        servo4.write(0);
+      }else{
+        Serial.println("4:OFF");
+      }
+    }
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distanceCm = duration * SOUND_VELOCITY/2;
+  Serial.print("Distance (cm): ");
+  Serial.println(distanceCm);
+
+    if(distanceCm >= 8){
+      Serial.print("Object = "); //////////////////////////////////////////////////////////////////////////////////////////////////////
+      Serial.print(mlx.readObjectTempC()); Serial.println("*C");
+      if( id1 =="success" ){
+        Serial.print("print ID 8 ");
+        String spo2, pulse, temp, postData;
+        int Patient_ID;
+        Patient_ID = 8;
+        spo2 = "97";
+        pulse = "88";
+        temp = String(mlx.readObjectTempC());  
+        postData = "&spo2=" + spo2 + "&pulse=" + pulse + "&temp=" + temp;
+        WiFiClient client9;
+        HTTPClient httpin;
+        httpin.begin(client9,"http://10.232.153.49:8080/Project/insert_board_esp8266/InsertDB.php");    
+        httpin.addHeader("Content-Type", "application/x-www-form-urlencoded");          
+        int httpCodein = httpin.POST(postData);   
+        String payload = httpin.getString();    
+        httpin.end();  //Close connection
+        //********************************************************************
+        WiFiClient client101;
+        HTTPClient http101;
+        String payload101 = "id=1&status=success";
+        http101.begin(client101, "http://10.232.153.49:8080/Project/update/health_box_symptoms.php");
+        http101.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        int httpCode = http101.POST(payload101);
+        String response = http101.getString();
+        http101.end();
+
+
+      }else if( id2 =="success" ){ ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Serial.print("print ID 9 ");
+         String spo2, pulse, temp, postData;
+        int Patient_ID;
+        Patient_ID = 9;
+        spo2 = "97";
+        pulse = "88";
+        temp = String(mlx.readObjectTempC());  
+        postData = "&spo2=" + spo2 + "&pulse=" + pulse + "&temp=" + temp;
+        WiFiClient client10;
+        HTTPClient httpin;
+        httpin.begin(client10,"http://10.232.153.49:8080/Project/insert_board_esp8266/InsertDB.php");    
+        httpin.addHeader("Content-Type", "application/x-www-form-urlencoded");          
+        int httpCodein = httpin.POST(postData);   
+        String payload = httpin.getString();    
+        httpin.end();  //Close connection
+         //********************************************************************
+        WiFiClient client102;
+        HTTPClient http102;
+        String payload102 = "id=2&status=success";
+        http102.begin(client102, "http://10.232.153.49:8080/Project/update/health_box_symptoms.php");
+        http102.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        int httpCode = http102.POST(payload102);
+        String response = http102.getString();
+        http102.end();
+      }else if(id3 =="success"){/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Serial.print("print ID 10 ");
+         String spo2, pulse, temp, postData;
+        int Patient_ID;
+        Patient_ID = 10;
+        spo2 = "97";
+        pulse = "88";
+        temp = String(mlx.readObjectTempC());  
+        postData = "&spo2=" + spo2 + "&pulse=" + pulse + "&temp=" + temp;
+        WiFiClient client11;
+        HTTPClient httpin;
+        httpin.begin(client11,"http://10.232.153.49:8080/Project/insert_board_esp8266/InsertDB.php");    
+        httpin.addHeader("Content-Type", "application/x-www-form-urlencoded");          
+        int httpCodein = httpin.POST(postData);   
+        String payload = httpin.getString();    
+        httpin.end();  //Close connection
+         //********************************************************************
+        WiFiClient client103;
+        HTTPClient http103;
+        String payload103 = "id=3&status=success";
+        http103.begin(client103, "http://10.232.153.49:8080/Project/update/health_box_symptoms.php");
+        http103.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        int httpCode = http103.POST(payload103);
+        String response = http103.getString();
+        http103.end();
+      }else if(id4 =="success"){//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Serial.print("print ID 11 ");
+         String spo2, pulse, temp, postData;
+        int Patient_ID;
+        Patient_ID = 11;
+        spo2 = "97";
+        pulse = "88";
+        temp = String(mlx.readObjectTempC());  
+        postData = "&spo2=" + spo2 + "&pulse=" + pulse + "&temp=" + temp;
+        WiFiClient client12;
+        HTTPClient httpin;
+        httpin.begin(client12,"http://10.232.153.49:8080/Project/insert_board_esp8266/InsertDB.php");    
+        httpin.addHeader("Content-Type", "application/x-www-form-urlencoded");          
+        int httpCodein = httpin.POST(postData);   
+        String payload = httpin.getString();    
+        httpin.end();  //Close connection
+             //********************************************************************
+        WiFiClient client104;
+        HTTPClient http104;
+        String payload104 = "id=4&status=success";
+        http104.begin(client104, "http://10.232.153.49:8080/Project/update/health_box_symptoms.php");
+        http104.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        int httpCode = http104.POST(payload104);
+        String response = http104.getString();
+        http104.end();
+      }else{////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////
+      }
+
+      
+    /*long irValue = particleSensor.getIR();
+
+      if (checkForBeat(irValue) == true){
+        long delta = millis() - lastBeat;
+        lastBeat = millis();
+        beatsPerMinute = 60 / (delta / 1000.0);
+        if (beatsPerMinute < 255 && beatsPerMinute > 20){
+          rates[rateSpot++] = (byte)beatsPerMinute; //Store this reading in the array
+          rateSpot %= RATE_SIZE; //Wrap variable
+          beatAvg = 0;
+          for (byte x = 0 ; x < RATE_SIZE ; x++)
+            beatAvg += rates[x];
+          beatAvg /= RATE_SIZE;
+        }
+      }
+      unsigned long currentTime = millis();
+      if (currentTime - lastMeasurementTime >= MEASUREMENT_INTERVAL) {
+        Serial.print("IR=");
+        Serial.print(irValue);
+        Serial.print(", Avg BPM=");
+        Serial.print(beatAvg);
+
+        if (irValue < 50000)
+          Serial.print(" No finger?");
+        Serial.println();
+
+        lastMeasurementTime = currentTime; //Reset the last measurement time
+      }*/
+    }
+    else{
+
+    }
+  delay(5000);
+}
