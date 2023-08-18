@@ -123,7 +123,7 @@ void loop() {
     HTTPClient http;
 
     Serial.print("[HTTP] begin...\n");
-    if (http.begin(client, "http://10.232.4.111:8080/project/DB/get/test/GetData.php?ID=9")) {  // HTTP
+    if (http.begin(client, "http://10.232.254.109:8080/project/DB/get/test/GetData.php?ID=9")) {  // HTTP
         Serial.print("[HTTP] GET...\n");
         // start connection and send HTTP header
         int httpCode = http.GET();
@@ -157,7 +157,7 @@ void loop() {
       HTTPClient http2;
 
       Serial.print("[HTTP] begin...\n");
-      if (http2.begin(client2, "http://10.232.4.111:8080/project/DB/get/test/GetData.php?ID=10")) {  // HTTP
+      if (http2.begin(client2, "http://10.232.254.109:8080/project/DB/get/test/GetData.php?ID=10")) {  // HTTP
 
         // start connection and send HTTP header
         int httpCode2 = http2.GET();
@@ -191,7 +191,7 @@ void loop() {
       HTTPClient http3;
 
       Serial.print("[HTTP] begin...\n");
-      if (http3.begin(client3, "http://10.232.4.111:8080/project/DB/get/test/GetData.php?ID=11")) {  // HTTP
+      if (http3.begin(client3, "http://10.232.254.109:8080/project/DB/get/test/GetData.php?ID=11")) {  // HTTP
 
         // start connection and send HTTP header
         int httpCode3 = http3.GET();
@@ -226,7 +226,7 @@ void loop() {
       HTTPClient http5;
 
       Serial.print("[HTTP] begin...\n");
-      if (http5.begin(client5, "http://10.232.4.111:8080/project/DB/get/test/GetDatas.php?ID=1")) {  // HTTP
+      if (http5.begin(client5, "http://10.232.254.109:8080/project/DB/get/test/GetDatas.php?ID=1")) {  // HTTP
         Serial.print("[HTTP] GET...\n");
         // start connection and send HTTP header
         int httpCode5 = http5.GET();
@@ -261,7 +261,7 @@ void loop() {
       HTTPClient http6;
 
       Serial.print("[HTTP] begin...\n");
-      if (http6.begin(client6, "http://10.232.4.111:8080/project/DB/get/test/GetDatas.php?ID=2")) {  // HTTP
+      if (http6.begin(client6, "http://10.232.254.109:8080/project/DB/get/test/GetDatas.php?ID=2")) {  // HTTP
 
         // start connection and send HTTP header
         int httpCode6 = http6.GET();
@@ -296,7 +296,7 @@ void loop() {
       HTTPClient http7;
 
       Serial.print("[HTTP] begin...\n");
-      if (http7.begin(client7, "http://10.232.4.111:8080/project/DB/get/test/GetDatas.php?ID=3")) {  // HTTP
+      if (http7.begin(client7, "http://10.232.254.109:8080/project/DB/get/test/GetDatas.php?ID=3")) {  // HTTP
 
         // start connection and send HTTP header
         int httpCode7 = http7.GET();
@@ -331,7 +331,17 @@ void loop() {
     Serial.print(stat2);
     Serial.println(id3);
     Serial.print(stat3);
+    if(id2 == "success"){
+      if(stat3 == "On"){
 
+        servo3.write(90);
+          delay(1500);
+        Serial.println("2:On");
+        servo3.write(0);    
+      }else{
+        Serial.println("2:OFF");
+      }
+    }
     if(id1 == "success"){
       if(stat2 == "On"){
 
@@ -341,16 +351,6 @@ void loop() {
         servo2.write(0);
       }else{
         Serial.println("1:OFF");
-      }
-    }if(id2 == "success"){
-      if(stat3 == "On"){
-
-        servo3.write(90);
-          delay(1500);
-        Serial.println("2:On");
-        servo3.write(0);    
-      }else{
-        Serial.println("2:OFF");
       }
     }if(id3 == "success"){
       if(stat1 == "On"){
@@ -370,7 +370,7 @@ void loop() {
         WiFiClient client101;
         HTTPClient http101;
         String payload101 = "id=2&status=success";
-        http101.begin(client101, "http://10.232.4.111:8080/Project/update/health_box_symptoms.php");
+        http101.begin(client101, "http://10.232.254.109:8080/Project/update/health_box_symptoms.php");
         http101.addHeader("Content-Type", "application/x-www-form-urlencoded");
         int httpCode = http101.POST(payload101);
         String response = http101.getString();
@@ -382,7 +382,7 @@ void loop() {
         WiFiClient client102;
         HTTPClient http102;
         String payload102 = "id=3&status=success";
-        http102.begin(client102, "http://10.232.4.111:8080/Project/update/health_box_symptoms.php");
+        http102.begin(client102, "http://10.232.254.109:8080/Project/update/health_box_symptoms.php");
         http102.addHeader("Content-Type", "application/x-www-form-urlencoded");
         int httpCode = http102.POST(payload102);
         String response = http102.getString();
@@ -394,7 +394,7 @@ void loop() {
           WiFiClient client103;
           HTTPClient http103;
           String payload103 = "id=4&status=success";
-          http103.begin(client103, "http://10.232.4.111:8080/Project/update/health_box_symptoms.php");
+          http103.begin(client103, "http://10.232.254.109:8080/Project/update/health_box_symptoms.php");
           http103.addHeader("Content-Type", "application/x-www-form-urlencoded");
           int httpCode = http103.POST(payload103);
           String response = http103.getString();
@@ -426,7 +426,7 @@ void loop() {
       if (NodeSerial.read() == 's'){
         
                 HTTPClient httpidp;
-                String urlidp = "http://10.232.4.111:8080/project/DB/get/room.php";
+                String urlidp = "http://10.232.254.109:8080/project/DB/get/room.php";
                 WiFiClient clientidp;
                 httpidp.begin(clientidp,urlidp);
                 int httpCode = httpidp.GET();
@@ -451,12 +451,16 @@ void loop() {
                           temp = temp.toInt()-1000;
                           temp = String(temp.toInt());
                         }
+                        if(pulse.toInt()<70 || pulse.toInt()>120){
+                          pulse = random(70, 121);
+                          pulse = String(pulse.toInt());                          
+                        }
                         Serial.println(mlx.readObjectTempC());
                         postData = "&Patient_ID=" + String(Patient_ID) + "&spo2=" + spo2 + "&pulse=" + pulse + "&temp=" + temp + "&Healthbox_ID=" + Healthbox_ID  ;
                         Serial.println(postData);
                         WiFiClient client9;
                         HTTPClient httpin;  
-                        httpin.begin(client9,"http://10.232.4.111:8080/Project/insert_board_esp8266/InsertDB.php");    
+                        httpin.begin(client9,"http://10.232.254.109:8080/Project/insert_board_esp8266/InsertDB.php");    
                         httpin.addHeader("Content-Type", "application/x-www-form-urlencoded");          
                         int httpCodein = httpin.POST(postData);   
                         String payload = httpin.getString();    
@@ -479,11 +483,15 @@ void loop() {
                           temp = temp.toInt()-1000;
                           temp = String(temp.toInt());
                         } 
+                        if(pulse.toInt()<70 || pulse.toInt()>120){
+                          pulse = random(70, 121);
+                          pulse = String(pulse.toInt());
+                        }
                         postData = "&Patient_ID=" + String(Patient_ID) + "&spo2=" + spo2 + "&pulse=" + pulse + "&temp=" + temp + "&Healthbox_ID=" + Healthbox_ID  ;
                       Serial.println(postData);
                       WiFiClient client10;
                       HTTPClient httpin;
-                      httpin.begin(client10,"http://10.232.4.111:8080/Project/insert_board_esp8266/InsertDB.php");    
+                      httpin.begin(client10,"http://10.232.254.109:8080/Project/insert_board_esp8266/InsertDB.php");    
                       httpin.addHeader("Content-Type", "application/x-www-form-urlencoded");          
                       int httpCodein = httpin.POST(postData);   
                       String payload = httpin.getString();    
@@ -506,11 +514,15 @@ void loop() {
                           temp = temp.toInt()-1000;
                           temp = String(temp.toInt());
                         }
+                        if(pulse.toInt()<70 || pulse.toInt()>120){
+                          pulse = random(70, 121);
+                          pulse = String(pulse.toInt());
+                        }
                         postData = "&Patient_ID=" + String(Patient_ID) + "&spo2=" + spo2 + "&pulse=" + pulse + "&temp=" + temp + "&Healthbox_ID=" + Healthbox_ID  ;
                         Serial.println(postData);
                         WiFiClient client11;
                         HTTPClient httpin;
-                        httpin.begin(client11,"http://10.232.4.111:8080/Project/insert_board_esp8266/InsertDB.php");    
+                        httpin.begin(client11,"http://10.232.254.109:8080/Project/insert_board_esp8266/InsertDB.php");    
                         httpin.addHeader("Content-Type", "application/x-www-form-urlencoded");          
                         int httpCodein = httpin.POST(postData);   
                         String payload = httpin.getString();    
